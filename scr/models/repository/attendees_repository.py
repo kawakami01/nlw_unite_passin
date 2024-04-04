@@ -1,9 +1,10 @@
 from scr.models.settings.connection import db_connection_handler
 from scr.models.entities.attendees import Attendees
 from scr.models.entities import Events
-from typing import Dict
+from typing import Dict, List
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
+from scr.models.entities.check_ins import CheckIns
 
 
 class AttendeesRepository:
@@ -46,3 +47,20 @@ class AttendeesRepository:
                 return attendee
             except NoResultFound:
                 return None
+            
+    def get_attendees_by_event_id(self, event_id: str) -> List[Attendees]:
+        with db_connection_handler as database:
+            return (
+                database.session
+                .query(Attendees)
+                .outerjoin(CheckIns, CheckIns.attendeeId==Attendees.id)
+                .filter(Attendees.event_id==event_id)
+                .with_entities(
+                    Attendees.id,
+                    Attendees.name,
+                    Attendees.email,
+                    CheckIns.created_at.label('checked_in_at'),
+                    Attendees.created_at.label('created_at')
+                )
+                .all()
+            )
