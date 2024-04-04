@@ -3,6 +3,7 @@ from flask_cors import CORS
 from scr.models.settings.connection import db_connection_handler
 from scr.main.routes.event_routes import event_route_bp
 from scr.main.routes.attendees_routes import attendees_route_bp
+from scr.main.routes.check_in_routes import check_in_route_bp
 
 
 db_connection_handler.connect_to_database()
@@ -13,3 +14,4 @@ CORS(app)
 
 app.register_blueprint(event_route_bp)
 app.register_blueprint(attendees_route_bp)
+app.register_blueprint(check_in_route_bp)

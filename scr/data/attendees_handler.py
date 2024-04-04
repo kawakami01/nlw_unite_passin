@@ -27,7 +27,7 @@ class AttendeesHandler():
         return HttpResponse(body=None, status_code=201)
         
     def find_attendee_badge(self, https_request: HttpRequest) -> HttpResponse:
-        attendee_id = https_request.param["attendee_id"] # mudar isso se der erro
+        attendee_id = https_request.param["attendee_id"]
         badge = self.__attendees_repository.get_attendee_badge_by_id(attendee_id)
         if not badge: raise Exception("Attendee not found!")
         
