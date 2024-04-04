@@ -5,6 +5,7 @@ from typing import Dict, List
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from scr.models.entities.check_ins import CheckIns
+from scr.errors.error_types.http_conflict import HttpConflictError
 
 
 class AttendeesRepository:
@@ -24,7 +25,7 @@ class AttendeesRepository:
 
                 return attendee_info
             except IntegrityError:
-                raise Exception('Attendee already registered!')
+                raise HttpConflictError('Attendee already registered!')
             except Exception as exception:
                 database.session.rollback()
                 raise exception
@@ -32,19 +33,13 @@ class AttendeesRepository:
     def get_attendee_badge_by_id(self, attendee_id: str):
         with db_connection_handler as database:
             try:
-                attendee = (
-                    database.session
-                    .query(Attendees)
+                return (
+                    database.session.query(Attendees)
                     .join(Events, Events.id == Attendees.event_id)
                     .filter(Attendees.id == attendee_id)
-                    .with_entities(
-                        Attendees.name,
-                        Attendees.email,
-                        Events.title
-                    )
+                    .with_entities(Attendees.name, Attendees.email, Events.title)
                     .one()
                 )
-                return attendee
             except NoResultFound:
                 return None
             

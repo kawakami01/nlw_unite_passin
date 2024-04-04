@@ -1,6 +1,7 @@
 from scr.models.repository.events_repository import EventsRepository
 from scr.http_types.http_request import HttpRequest
 from scr.http_types.http_response import HttpResponse
+from scr.errors.error_types.http_not_found import HttpNotFoundError
 import uuid
 
 
@@ -21,7 +22,7 @@ class EventHandler:
     def find_by_id(self,  https_request: HttpRequest) -> HttpResponse:
         event_id = https_request.param["event_id"]
         event = self.__events_repository.get_event_by_id(event_id)
-        if not event: raise Exception("Event not found")
+        if not event: raise HttpNotFoundError("Event not found")
         
         event_attendees_count = self.__events_repository.count_event_attendees(event_id)
 

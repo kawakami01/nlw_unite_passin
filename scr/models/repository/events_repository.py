@@ -4,6 +4,7 @@ from scr.models.entities.events import Events
 from scr.models.entities.attendees import Attendees
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
+from scr.errors.error_types.http_conflict import HttpConflictError
 
 
 class EventsRepository:
@@ -21,8 +22,8 @@ class EventsRepository:
                 database.session.commit()
 
                 return events_info
-            except IntegrityError:
-                raise Exception('Event already registered!')
+            except IntegrityError as e:
+                raise HttpConflictError('Event already registered!') from e
             except Exception as exception:
                 database.session.rollback()
                 raise exception
@@ -31,13 +32,11 @@ class EventsRepository:
     def get_event_by_id(self, event_id: str) -> Events:
         with db_connection_handler as database:
             try:
-                event = (
-                    database.session
-                    .query(Events)
+                return (
+                    database.session.query(Events)
                     .filter(Events.id == event_id)
                     .one()
                 )
-                return event
             except NoResultFound:
                 return None
             
